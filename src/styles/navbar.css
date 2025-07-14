@@ -1,0 +1,37 @@
+.nav {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  top: 0;
+  left: 0;
+  background: white;
+  padding: 0.3rem;
+  box-sizing: border-box;
+}
+
+.nav-header {
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+}
+
+.nav-btn {
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  padding: 8px;
+  transition: background 0.3s ease;
+}
+
+.nav-btn:hover {
+  background: rgba(0, 0, 0, 0.09);
+}
+
+.nav-items {
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+  margin-left: 30px;
+}
