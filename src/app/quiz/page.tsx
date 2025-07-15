@@ -21,6 +21,23 @@ export default function QuizPage() {
     load();
   }, []);
   
+  useEffect(() => {
+    if (questions.length === 0) return;
+    const allAnswered = Object.keys(selected).length === questions.length;
+    if (!allAnswered) return;
+    
+    const totalCorrect = questions.reduce((acc, q, i) => {
+      return selected[i] === q.correct ? acc + 1 : acc;
+    }, 0);
+    const incorrect = questions.length - totalCorrect;
+    
+    UserManage.incrementCurrentLearnDataBatch({
+      correctAnswers: totalCorrect,
+      incorrectAnswers: incorrect,
+    });
+    UserManage.recalculateMetrics();
+  }, [selected, questions]);
+  
   const handleSelect = (qIndex: number, aIndex: number) => {
     if (selected[qIndex] !== undefined) return;
     setSelected((prev) => ({ ...prev, [qIndex]: aIndex }));
