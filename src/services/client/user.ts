@@ -33,8 +33,15 @@ export function fakeData(): void {
 
 export function readStorage(): UserData {
   if (typeof window !== 'undefined') {
+    
+    if(!localStorage.getItem("MasterVocab_Data")) writeStorage({
+      history: [],
+      vocabularies: [],
+    });
+    
     return JSON.parse(localStorage.getItem("MasterVocab_Data") || '{}') as UserData;
   }
+  
   return {
     history: [],
     vocabularies: [],

@@ -10,7 +10,6 @@ export default function Home() {
   const [latestData, setLatestData] = useState < LearnData | null > (null);
   
   useEffect(() => {
-    fakeData();
     const recentData = UserManage.getRecentLearningData();
     const chartData = {
       labels: recentData.map(d => d.date),
