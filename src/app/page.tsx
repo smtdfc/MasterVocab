@@ -1,10 +1,32 @@
-'use client';
+"use client";
 
 import "@/styles/pages/home.css";
-import { UserManage, fakeData } from '@/services/client/user';
+import { UserManage } from '@/services/client/user';
 import { LearnData } from '@/types';
 import { useEffect, useState } from 'react';
-import * as Chartist from 'chartist';
+import {
+  Chart as ChartJS,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+  LineElement,
+  PointElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
+
+ChartJS.register(
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+  LineElement,
+  PointElement,
+  Tooltip,
+  Legend
+);
 
 const allStats = [
   { label: "Total Word Attempts", key: "totalWordAttempts" },
@@ -21,44 +43,106 @@ const allStats = [
   { label: "Mastery Score", key: "masteryScore" },
 ];
 
+const MAX_VOCAB = 150;
+const MAX_PRACTICE = 50;
+const clamp01 = (value: number) => Math.min(1, value);
+
 export default function Home() {
-  const [latestData, setLatestData] = useState < LearnData | null > (null);
-  
+  const [latestData, setLatestData] = useState<LearnData | null>(null);
+  const [recentData, setRecentData] = useState<LearnData[]>([]);
+
   useEffect(() => {
-    const recentData = UserManage.getRecentLearningData();
-    const chartData = {
-      labels: recentData.map(d => d.date),
-      series: [
-        recentData.map(d => d.totalWordAttempts),
-        recentData.map(d => d.totalPractice)
-      ],
-    };
-    
-    new Chartist.BarChart('.ct-chart', chartData, {
-      seriesBarDistance: 15,
-      axisY: { onlyInteger: true, offset: 40 },
-    });
-    setLatestData(recentData.at(-1) ?? null);
+    const history = UserManage.getRecentLearningData();
+    setRecentData(history);
+    setLatestData(history.at(-1) ?? null);
   }, []);
-  
-  const MAX_VOCAB = 150;
-  const MAX_PRACTICE = 50;
-  const clamp01 = (value: number) => Math.min(1, value);
+
   const learningSpeed = latestData && latestData.totalPractice > 0 ?
     latestData.totalWordAttempts / latestData.totalPractice :
     0;
-  
+
   const performance = latestData ?
     (
       clamp01(latestData.totalWordAttempts / MAX_VOCAB) * 0.6 +
       clamp01(latestData.totalPractice / MAX_PRACTICE) * 0.4
     ) * 100 :
     0;
-  
+
   return (
     <>
       <h3>Learning effectiveness</h3>
-      <div className="ct-chart ct-perfect-fourth"></div>
+
+      <div style={{ maxWidth: 800 }}>
+        <Line
+          data={{
+            labels: recentData.map(d => d.date),
+            datasets: [
+              {
+                label: 'Completion Rate (%)',
+                data: recentData.map(d => d.completionRate),
+                borderColor: '#4BC0C0',
+                fill: false,
+              },
+            ],
+          }}
+        />
+
+        <Bar
+          data={{
+            labels: recentData.map(d => d.date),
+            datasets: [
+              {
+                label: 'Correct',
+                data: recentData.map(d => d.correctAnswers),
+                backgroundColor: '#36A2EB',
+              },
+              {
+                label: 'Incorrect',
+                data: recentData.map(d => d.incorrectAnswers),
+                backgroundColor: '#FF6384',
+              },
+            ],
+          }}
+        />
+
+        {latestData && (
+          <Doughnut
+            data={{
+              labels: ['Correct', 'Incorrect'],
+              datasets: [
+                {
+                  data: [latestData.correctAnswers, latestData.incorrectAnswers],
+                  backgroundColor: ['#36A2EB', '#FF6384'],
+                },
+              ],
+            }}
+          />
+        )}
+
+        {latestData && (
+          <Bar
+            data={{
+              labels: ['Total Word Attempts', 'Total Practice'],
+              datasets: [
+                {
+                  label: 'Normalized Score',
+                  data: [
+                    clamp01(latestData.totalWordAttempts / MAX_VOCAB),
+                    clamp01(latestData.totalPractice / MAX_PRACTICE),
+                  ],
+                  backgroundColor: ['#42A5F5', '#66BB6A'],
+                },
+              ],
+            }}
+            options={{
+              indexAxis: 'y',
+              scales: {
+                x: { min: 0, max: 1 },
+              },
+            }}
+          />
+        )}
+      </div>
 
       <h3>Learning Statistics</h3>
       <table>
@@ -89,7 +173,7 @@ export default function Home() {
 type StatRowProps = {
   label: string;
   value: string | number;
-  highlight ? : number;
+  highlight?: number;
 };
 
 function StatRow({ label, value, highlight }: StatRowProps) {
@@ -99,7 +183,7 @@ function StatRow({ label, value, highlight }: StatRowProps) {
     else if (highlight >= 50) color = "orange";
     else color = "red";
   }
-  
+
   return (
     <tr>
       <th>{label}</th>
