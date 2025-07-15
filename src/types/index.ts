@@ -17,7 +17,7 @@ export interface LearnData {
 
 export interface Vocab {
   word: string;
-  meaning: string;
+  meaning: string[];
 }
 
 export interface UserData {

@@ -107,7 +107,8 @@ export class UserManage {
     const data = readStorage();
     const exists = data.vocabularies.some(v => v.word === word);
     if (!exists) {
-      data.vocabularies.push({ word, meaning });
+      let normalize = meaning.split(',').map(v => v.trim());
+      data.vocabularies.push({ word, meaning: normalize });
       this.incrementCurrentLearnDataBatch({ uniqueWords: 1 });
       this.recalculateMetrics();
       writeStorage(data);
@@ -213,23 +214,32 @@ export class UserManage {
   
   static importDict(words: Vocab[]) {
     const data = readStorage();
-    let count = 0;
+    let newWordCount = 0;
     
     for (const v of words) {
-      const exists = data.vocabularies.some(w => w.word === v.word);
-      if (!exists) {
-        data.vocabularies.push(v);
-        count++;
+      const existing = data.vocabularies.find(w => w.word === v.word);
+      
+      if (!existing) {
+        data.vocabularies.push({
+          word: v.word,
+          meaning: [...v.meaning]
+        });
+        newWordCount++;
+      } else {
+        const newMeanings = v.meaning.filter(m => !existing.meaning.includes(m));
+        if (newMeanings.length > 0) {
+          existing.meaning.push(...newMeanings);
+        }
       }
     }
     
-    if (count > 0) {
-      this.incrementCurrentLearnDataBatch({ uniqueWords: count });
-      this.recalculateMetrics();
-      writeStorage(data);
+    if (newWordCount > 0) {
+      this.incrementCurrentLearnDataBatch({ uniqueWords: newWordCount });
     }
+    
+    this.recalculateMetrics();
+    writeStorage(data);
   }
-  
 }
 
 function generateQuestions(words: Vocab[]): Question[] {
@@ -256,7 +266,8 @@ function generateQuestions(words: Vocab[]): Question[] {
     
     const answers: Record < number, string > = {};
     allChoices.forEach((choice, index) => {
-      answers[index] = choice;
+      let maxChoice = choice.length;
+      answers[index] = choice[Math.floor(Math.random() * maxChoice)];
     });
     
     return {
