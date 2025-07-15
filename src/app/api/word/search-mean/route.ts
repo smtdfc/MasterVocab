@@ -14,7 +14,7 @@ Examples:
 - Hello -> Xin chào  
 - Bag -> Cái túi, cái cặp  
 - Run -> Chạy
-`,
+`;
 
 export async function POST(req: NextRequest) {
   const { word } = await req.json();
