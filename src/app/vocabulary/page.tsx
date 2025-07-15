@@ -43,7 +43,7 @@ export default function Page() {
             <VocabCard 
             key={i} 
             word={item.word} 
-            meaning={item.meaning.join(",")} 
+            meaning={item.meaning.join(", ")} 
             onRemove={async (word:string) => {
               await UserManage.removeWord(word);
               const newResults = await UserManage.search(search, limit, offset);

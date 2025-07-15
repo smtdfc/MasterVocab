@@ -185,30 +185,30 @@ export class UserManage {
     const today = getCurrentDateFormatted();
     const lastActive = data.lastActive;
     
-    if (lastActive === today) return;
-    
-    const yesterday = (() => {
-      const d = new Date();
-      d.setDate(d.getDate() - 1);
-      return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-    })();
-    
-    const todayIndex = data.history.findIndex(h => h.date === today);
-    const yesterdayEntry = data.history.find(h => h.date === yesterday);
-    
-    if (todayIndex === -1) {
-      data.history.push(createEmptyLearnData(today));
+    if (lastActive !== today) {
+      const yesterday = (() => {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+      })();
+      
+      const todayIndex = data.history.findIndex(h => h.date === today);
+      const yesterdayEntry = data.history.find(h => h.date === yesterday);
+      
+      if (todayIndex === -1) {
+        data.history.push(createEmptyLearnData(today));
+      }
+      
+      const todayEntry = data.history.find(h => h.date === today) !;
+      
+      if (yesterdayEntry && lastActive === yesterday) {
+        todayEntry.dailyStreak = (yesterdayEntry.dailyStreak || 0) + 1;
+      } else {
+        todayEntry.dailyStreak = 1;
+      }
+      
+      data.lastActive = today;
     }
-    
-    const todayEntry = data.history.find(h => h.date === today) !;
-    
-    if (yesterdayEntry && lastActive === yesterday) {
-      todayEntry.dailyStreak = (yesterdayEntry.dailyStreak || 0) + 1;
-    } else {
-      todayEntry.dailyStreak = 1;
-    }
-    
-    data.lastActive = today;
     writeStorage(data);
   }
   

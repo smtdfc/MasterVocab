@@ -13,8 +13,8 @@ export default function Page() {
     
     try {
       const text = await file.text();
-      const json = JSON.parse(text) ;
-      
+      const json = JSON.parse(text);
+      alert(text);
       if (!Array.isArray(json.words) || !json.words.every(isValidVocab)) {
         throw new Error("Invalid schema. Expected { words: Vocab[] }");
       }
@@ -28,7 +28,7 @@ export default function Page() {
   };
   
   const isValidVocab = (v: any): v is Vocab => {
-    return typeof v.word === "string" && typeof v.meaning === "string";
+    return typeof v.word === "string" && v.meaning instanceof Array;
   };
   
   return (

@@ -22,8 +22,7 @@ export default function QuizPage() {
   }, []);
   
   useEffect(() => {
-    if (questions.length === 0) return;
-    const allAnswered = Object.keys(selected).length === questions.length;
+    const allAnswered = questions.length > 0 && Object.keys(selected).length === questions.length;
     if (!allAnswered) return;
     
     const totalCorrect = questions.reduce((acc, q, i) => {
@@ -36,7 +35,8 @@ export default function QuizPage() {
       incorrectAnswers: incorrect,
     });
     UserManage.recalculateMetrics();
-  }, [selected, questions]);
+  }, [questions.length === Object.keys(selected).length]);
+  
   
   const handleSelect = (qIndex: number, aIndex: number) => {
     if (selected[qIndex] !== undefined) return;
