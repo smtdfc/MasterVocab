@@ -14,7 +14,7 @@ export default function Page() {
     try {
       const text = await file.text();
       const json = JSON.parse(text);
-      alert(text);
+      
       if (!Array.isArray(json.words) || !json.words.every(isValidVocab)) {
         throw new Error("Invalid schema. Expected { words: Vocab[] }");
       }

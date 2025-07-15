@@ -34,6 +34,7 @@ export default function QuizPage() {
       correctAnswers: totalCorrect,
       incorrectAnswers: incorrect,
     });
+    
     UserManage.recalculateMetrics();
   }, [questions.length === Object.keys(selected).length]);
   

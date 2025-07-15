@@ -84,7 +84,7 @@ export class UserManage {
         const k = key as keyof LearnData;
         const curValue = current[k];
         const addValue = update[k];
-        if (current[k] && typeof curValue === 'number' && typeof addValue === 'number') {
+        if (typeof curValue === 'number' && typeof addValue === 'number') {
           (current[k] as number) = curValue + addValue;
         }
       }
@@ -93,7 +93,7 @@ export class UserManage {
       for (const key in update) {
         const k = key as keyof LearnData;
         const addValue = update[k];
-        if (newEntry[k] && typeof newEntry[k] === 'number' && typeof addValue === 'number') {
+        if (typeof newEntry[k] === 'number' && typeof addValue === 'number') {
           (newEntry[k] as number) = addValue;
         }
       }
