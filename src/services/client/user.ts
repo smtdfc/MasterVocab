@@ -31,7 +31,7 @@ let cache: UserData | null = null;
 
 export function readStorage(): UserData {
   if (cache) return cache;
-
+  
   if (typeof window !== 'undefined') {
     const raw = localStorage.getItem("MasterVocab_Data");
     if (!raw) {
@@ -46,7 +46,7 @@ export function readStorage(): UserData {
     }
     return cache!;
   }
-
+  
   cache = {
     history: [],
     vocabularies: [],
@@ -66,18 +66,18 @@ export class UserManage {
   static getRecentLearningData(): LearnData[] {
     return readStorage().history.slice(-6);
   }
-
+  
   static removeWord(word: string) {
     const data = readStorage();
     data.vocabularies = data.vocabularies.filter(v => v.word !== word);
     writeStorage(data);
   }
-
-  static incrementCurrentLearnDataBatch(update: Partial<Record<keyof LearnData, number>>): void {
+  
+  static incrementCurrentLearnDataBatch(update: Partial < Record < keyof LearnData, number >> ): void {
     const data = readStorage();
     const currentDate = getCurrentDateFormatted();
     const index = data.history.findIndex(h => h.date === currentDate);
-
+    
     if (index !== -1) {
       const current = data.history[index];
       for (const key in update) {
@@ -99,10 +99,10 @@ export class UserManage {
       }
       data.history.push(newEntry);
     }
-
+    
     writeStorage(data);
   }
-
+  
   static addWord(word: string, meaning: string) {
     const data = readStorage();
     const exists = data.vocabularies.some(v => v.word === word);
@@ -113,7 +113,7 @@ export class UserManage {
       writeStorage(data);
     }
   }
-
+  
   static search(query: string, limit = 10, offset = 0): Vocab[] {
     const data = readStorage();
     const allVocab = data.vocabularies || [];
@@ -121,37 +121,37 @@ export class UserManage {
     const matched = q ? allVocab.filter(v => v.word.toLowerCase().includes(q)) : allVocab;
     return matched.slice(offset, offset + limit);
   }
-
-  static async searchMean(word: string): Promise<string> {
+  
+  static async searchMean(word: string): Promise < string > {
     const res = await fetch('/api/word/search-mean', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ word }),
     });
-
+    
     if (!res.ok) {
       throw 'Error when send request !';
     }
-
+    
     const data = await res.json();
     return data.result.meaning as string;
   }
-
-  static updateCurrentLearnDataBatch(update: Partial<LearnData>): void {
+  
+  static updateCurrentLearnDataBatch(update: Partial < LearnData > ): void {
     const data = readStorage();
     const currentDate = getCurrentDateFormatted();
     const index = data.history.findIndex(h => h.date === currentDate);
-
+    
     if (index !== -1) {
       data.history[index] = { ...data.history[index], ...update };
     } else {
       const newEntry = { ...createEmptyLearnData(currentDate), ...update };
       data.history.push(newEntry);
     }
-
+    
     writeStorage(data);
   }
-
+  
   static generateQuestions(): Question[] {
     const data = readStorage();
     const ques = generateQuestions(data.vocabularies);
@@ -162,83 +162,103 @@ export class UserManage {
     this.recalculateMetrics();
     return ques;
   }
-
+  
   static recalculateMetrics(): void {
     const data = readStorage();
     const currentDate = getCurrentDateFormatted();
     const index = data.history.findIndex(h => h.date === currentDate);
     if (index === -1) return;
-
+    
     const entry = data.history[index];
-
-    entry.avgAttemptsPerWord = entry.uniqueWords > 0
-      ? parseFloat((entry.totalWordAttempts / entry.uniqueWords).toFixed(2))
-      : 0;
-
-    entry.completionRate = entry.totalWordAttempts > 0
-      ? parseFloat((entry.correctAnswers / entry.totalWordAttempts * 100).toFixed(2))
-      : 0;
-
+    
+    entry.avgAttemptsPerWord = entry.uniqueWords > 0 ?
+      parseFloat((entry.totalWordAttempts / entry.uniqueWords).toFixed(2)) :
+      0;
+    
+    entry.completionRate = entry.totalWordAttempts > 0 ?
+      parseFloat((entry.correctAnswers / entry.totalWordAttempts * 100).toFixed(2)) :
+      0;
+    
     entry.masteryScore = Math.max(0, entry.correctAnswers - entry.incorrectAnswers);
-
+    
     const today = getCurrentDateFormatted();
     const lastActive = data.lastActive;
-
+    
     if (lastActive === today) return;
-
+    
     const yesterday = (() => {
       const d = new Date();
       d.setDate(d.getDate() - 1);
       return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
     })();
-
+    
     const todayIndex = data.history.findIndex(h => h.date === today);
     const yesterdayEntry = data.history.find(h => h.date === yesterday);
-
+    
     if (todayIndex === -1) {
       data.history.push(createEmptyLearnData(today));
     }
-
-    const todayEntry = data.history.find(h => h.date === today)!;
-
+    
+    const todayEntry = data.history.find(h => h.date === today) !;
+    
     if (yesterdayEntry && lastActive === yesterday) {
       todayEntry.dailyStreak = (yesterdayEntry.dailyStreak || 0) + 1;
     } else {
       todayEntry.dailyStreak = 1;
     }
-
+    
     data.lastActive = today;
     writeStorage(data);
   }
+  
+  static importDict(words: Vocab[]) {
+    const data = readStorage();
+    let count = 0;
+    
+    for (const v of words) {
+      const exists = data.vocabularies.some(w => w.word === v.word);
+      if (!exists) {
+        data.vocabularies.push(v);
+        count++;
+      }
+    }
+    
+    if (count > 0) {
+      this.incrementCurrentLearnDataBatch({ uniqueWords: count });
+      this.recalculateMetrics();
+      writeStorage(data);
+    }
+  }
+  
 }
 
 function generateQuestions(words: Vocab[]): Question[] {
   if (words.length < 4) {
     throw new Error("At least 4 words are required to generate multiple-choice questions (1 correct + 3 incorrect).");
   }
-
+  
   const shuffledWords = [...words].sort(() => Math.random() - 0.5).slice(0, 10);
-
+  
   return shuffledWords.map((vocab) => {
     const wrongChoices = words
       .filter(w => w.word !== vocab.word)
       .sort(() => Math.random() - 0.5)
       .slice(0, 3)
       .map(w => w.meaning);
-
+    
     if (wrongChoices.length < 3) {
       throw new Error(`Not enough incorrect options to generate a question for the word '${vocab.word}'.`);
     }
-
+    
     const allChoices = [...wrongChoices];
     const correctIndex = Math.floor(Math.random() * 4);
     allChoices.splice(correctIndex, 0, vocab.meaning);
-
-    const answers: Record<number, string> = {};
+    
+    const answers: Record < number, string > = {};
     allChoices.forEach((choice, index) => {
       answers[index] = choice;
     });
-
+    
     return {
       content: `What is the meaning of "${vocab.word}"?`,
       correct: correctIndex,
@@ -246,5 +266,3 @@ function generateQuestions(words: Vocab[]): Question[] {
     };
   });
 }
-
-
