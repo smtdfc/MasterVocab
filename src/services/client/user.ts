@@ -1,4 +1,4 @@
-import { UserData, LearnData, Vocab } from '@/types';
+import { UserData, LearnData, Vocab ,Question} from '@/types';
 
 
 export function fakeData(): void {
@@ -106,4 +106,47 @@ export class UserManage {
     let data =  await res.json();
     return data.result.meaning as string;
   }
+  
+  static generateQuestions():Question[]{
+    return generateQuestions(readStorage().vocabularies);
+  }
+  
+  
+}
+
+
+
+function generateQuestions(words: Vocab[]): Question[] {
+  if (words.length < 4) {
+    throw new Error("At least 4 words are required to generate multiple-choice questions (1 correct + 3 incorrect).");
+  }
+  
+  const shuffledWords = [...words].sort(() => Math.random() - 0.5).slice(0, 10);
+  
+  return shuffledWords.map((vocab) => {
+    const wrongChoices = words
+      .filter(w => w.word !== vocab.word)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3)
+      .map(w => w.meaning);
+    
+    if (wrongChoices.length < 3) {
+      throw new Error(`Not enough incorrect options to generate a question for the word '${vocab.word}'.`);
+    }
+    
+    const allChoices = [...wrongChoices];
+    const correctIndex = Math.floor(Math.random() * 4);
+    allChoices.splice(correctIndex, 0, vocab.meaning);
+    
+    const answers: Record < number, string > = {};
+    allChoices.forEach((choice, index) => {
+      answers[index] = choice;
+    });
+    
+    return {
+      content: `What is the meaning of "${vocab.word}"?`,
+      correct: correctIndex,
+      answers,
+    };
+  });
 }

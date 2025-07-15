@@ -37,6 +37,9 @@ export default function Offcanvas() {
           <li onClick={() => router.push('/vocabulary')}>
             <a>Vocabulary</a>
           </li>
+          <li onClick={() => router.push('/quiz')}>
+            <a>Quiz Game</a>
+          </li>
         </ul>
       </div>
     </div>

@@ -13,3 +13,9 @@ export interface UserData {
   history: LearnData[];
   vocabularies:Vocab[];
 }
+
+export interface Question {
+  content: string;
+  correct: number;
+  answers: Record < number,string > ;
+}
