@@ -23,6 +23,7 @@ export interface Vocab {
 export interface UserData {
   history: LearnData[];
   vocabularies:Vocab[];
+  lastActive:string; //timestamp
 }
 
 export interface Question {
