@@ -26,12 +26,12 @@ export function fakeData(): void {
     
     localStorage.setItem("MasterVocab_Data", JSON.stringify({
         history: [
-          { date: "11/7/2035", totalVocab: 2000, totalPractice: 300000 },
-          { date: "12/7/2035", totalVocab: 4000, totalPractice: 300000 },
-          { date: "13/7/2035", totalVocab: 5000, totalPractice: 300000 },
-          { date: "14/7/2035", totalVocab: 2000, totalPractice: 300000 },
-          { date: "15/7/2035", totalVocab: 2000, totalPractice: 300000 },
-          { date: "16/7/2035", totalVocab: 6000, totalPractice: 300000 },
+          { date: "11/7/2035", totalWordAttempts: 2000, totalPractice: 300000 },
+          { date: "12/7/2035", totalWordAttempts: 4000, totalPractice: 300000 },
+          { date: "13/7/2035", totalWordAttempts: 5000, totalPractice: 300000 },
+          { date: "14/7/2035", totalWordAttempts: 2000, totalPractice: 300000 },
+          { date: "15/7/2035", totalWordAttempts: 2000, totalPractice: 300000 },
+          { date: "16/7/2035", totalWordAttempts: 6000, totalPractice: 300000 },
         ],
         vocabularies,
       } as UserData));
@@ -65,7 +65,7 @@ export function writeStorage(data: UserData) {
 export class UserManage {
   static addAchievements(
     totalPractice: number = 0,
-    totalVocab: number = 0
+    totalWordAttempts: number = 0
   ) {
     let data = readStorage();
     let isNewAche = false;
@@ -74,13 +74,13 @@ export class UserManage {
       let achievement = data.history[data.history.length - 1];
       data.history[data.history.length - 1] = {
         date: currentDate,
-        totalVocab: achievement.totalVocab + totalVocab,
+        totalWordAttempts: achievement.totalWordAttempts + totalWordAttempts,
         totalPractice: achievement.totalPractice + totalPractice,
       };
     } else {
       data.history.push({
         date: currentDate,
-        totalVocab,
+        totalWordAttempts,
         totalPractice
       });
     }

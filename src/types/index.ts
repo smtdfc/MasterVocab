@@ -1,6 +1,6 @@
 export interface LearnData {
   date: string;
-  totalVocab: number;
+  totalWordAttempts: number;
   totalPractice: number;
 }
 

@@ -14,7 +14,7 @@ export default function Home() {
     const chartData = {
       labels: recentData.map(d => d.date),
       series: [
-        recentData.map(d => d.totalVocab),
+        recentData.map(d => d.totalWordAttempts),
         recentData.map(d => d.totalPractice)
       ],
     };
@@ -30,12 +30,12 @@ export default function Home() {
   const MAX_PRACTICE = 50;
   const clamp01 = (value: number) => Math.min(1, value);
   const learningSpeed = latestData && latestData.totalPractice > 0 ?
-    latestData.totalVocab / latestData.totalPractice :
+    latestData.totalWordAttempts / latestData.totalPractice :
     0;
   
   const performance = latestData ?
     (
-      clamp01(latestData.totalVocab / MAX_VOCAB) * 0.6 +
+      clamp01(latestData.totalWordAttempts / MAX_VOCAB) * 0.6 +
       clamp01(latestData.totalPractice / MAX_PRACTICE) * 0.4
     ) * 100 :
     0;
@@ -48,7 +48,7 @@ export default function Home() {
       <h3>Learning Statistics</h3>
       <table>
         <tbody>
-          <StatRow label="Total Vocabulary" value={latestData?.totalVocab ?? 0} />
+          <StatRow label="Total Word Attempts" value={latestData?.totalWordAttempts ?? 0} />
           <StatRow label="Total Practice" value={latestData?.totalPractice ?? 0} />
           <StatRow label="Learning speed" value={learningSpeed.toFixed(2)} />
           <StatRow
