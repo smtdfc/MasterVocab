@@ -6,6 +6,21 @@ import { LearnData } from '@/types';
 import { useEffect, useState } from 'react';
 import * as Chartist from 'chartist';
 
+const allStats = [
+  { label: "Total Word Attempts", key: "totalWordAttempts" },
+  { label: "Total Practice Sessions", key: "totalPractice" },
+  { label: "Unique Words", key: "uniqueWords" },
+  { label: "Correct Answers", key: "correctAnswers" },
+  { label: "Incorrect Answers", key: "incorrectAnswers" },
+  { label: "Average Attempts per Word", key: "avgAttemptsPerWord" },
+  { label: "Session Count", key: "sessionCount" },
+  { label: "Average Session Length", key: "avgSessionLength" },
+  { label: "Daily Streak", key: "dailyStreak" },
+  { label: "Average Recall Time", key: "avgRecallTime" },
+  { label: "Completion Rate", key: "completionRate", suffix: "%" },
+  { label: "Mastery Score", key: "masteryScore" },
+];
+
 export default function Home() {
   const [latestData, setLatestData] = useState < LearnData | null > (null);
   
@@ -48,11 +63,20 @@ export default function Home() {
       <h3>Learning Statistics</h3>
       <table>
         <tbody>
-          <StatRow label="Total Word Attempts" value={latestData?.totalWordAttempts ?? 0} />
-          <StatRow label="Total Practice" value={latestData?.totalPractice ?? 0} />
-          <StatRow label="Learning speed" value={learningSpeed.toFixed(2)} />
+          {allStats.map(({ label, key, suffix }) => (
+            <StatRow
+              key={key}
+              label={label}
+              value={
+                latestData
+                  ? `${(latestData[key as keyof LearnData] ?? 0)}${suffix ?? ""}`
+                  : "-"
+              }
+            />
+          ))}
+          <StatRow label="Learning Speed" value={learningSpeed.toFixed(2)} />
           <StatRow
-            label="Learning performance"
+            label="Learning Performance"
             value={`${performance.toFixed(2)}%`}
             highlight={performance}
           />

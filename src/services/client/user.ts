@@ -1,5 +1,24 @@
 import { UserData, LearnData, Vocab, Question } from '@/types';
 
+function createEmptyLearnData(date: string): LearnData {
+  return {
+    date,
+    totalWordAttempts: 0,
+    totalPractice: 0,
+    uniqueWords: 0,
+    correctAnswers: 0,
+    incorrectAnswers: 0,
+    mostFailedWords: [],
+    avgAttemptsPerWord: 0,
+    sessionCount: 0,
+    avgSessionLength: 0,
+    dailyStreak: 0,
+    avgRecallTime: 0,
+    completionRate: 0,
+    masteryScore: 0,
+  };
+}
+
 function getCurrentDateFormatted(): string {
   const now = new Date();
   const day = String(now.getDate()).padStart(2, '0');
@@ -61,31 +80,7 @@ export function writeStorage(data: UserData) {
   }
 }
 
-
 export class UserManage {
-  static addAchievements(
-    totalPractice: number = 0,
-    totalWordAttempts: number = 0
-  ) {
-    let data = readStorage();
-    let isNewAche = false;
-    let currentDate = getCurrentDateFormatted();
-    if (data.history[data.history.length - 1] && data.history[data.history.length - 1].date === currentDate) {
-      let achievement = data.history[data.history.length - 1];
-      data.history[data.history.length - 1] = {
-        date: currentDate,
-        totalWordAttempts: achievement.totalWordAttempts + totalWordAttempts,
-        totalPractice: achievement.totalPractice + totalPractice,
-      };
-    } else {
-      data.history.push({
-        date: currentDate,
-        totalWordAttempts,
-        totalPractice
-      });
-    }
-    writeStorage(data);
-  }
   
   static getRecentLearningData(): LearnData[] {
     const data = readStorage();
@@ -98,13 +93,46 @@ export class UserManage {
     writeStorage(data);
   }
   
+  static incrementCurrentLearnDataBatch(update: Partial < Record < keyof LearnData, number >> ): void {
+    const data = readStorage();
+    const currentDate = getCurrentDateFormatted();
+    const index = data.history.findIndex(h => h.date === currentDate);
+    
+    if (index !== -1) {
+      const current = data.history[index];
+      for (const key in update) {
+        const k = key as keyof LearnData;
+        const curValue = current[k];
+        const addValue = update[k];
+        if (typeof curValue === 'number' && typeof addValue === 'number') {
+          (current[k] as number) = curValue + addValue;
+        }
+      }
+    } else {
+      const newEntry = createEmptyLearnData(currentDate);
+      for (const key in update) {
+        const k = key as keyof LearnData;
+        const addValue = update[k];
+        if (typeof newEntry[k] === 'number' && typeof addValue === 'number') {
+          (newEntry[k] as number) = addValue;
+        }
+      }
+      data.history.push(newEntry);
+    }
+    
+    writeStorage(data);
+  }
+  
   static addWord(word: string, meaning: string) {
     const data = readStorage();
-    data.vocabularies.push({
-      word,
-      meaning
-    });
-    writeStorage(data);
+    const exists = data.vocabularies.some(v => v.word === word);
+    if (!exists) {
+      data.vocabularies.push({ word, meaning });
+      this.incrementCurrentLearnDataBatch({
+        uniqueWords: 1,
+      });
+      writeStorage(data);
+    }
   }
   
   static search(query: string, limit = 10, offset = 0): Vocab[] {
@@ -138,16 +166,59 @@ export class UserManage {
     return data.result.meaning as string;
   }
   
+  static updateCurrentLearnDataBatch(update: Partial < LearnData > ): void {
+    const data = readStorage();
+    const currentDate = getCurrentDateFormatted();
+    const index = data.history.findIndex(h => h.date === currentDate);
+    
+    if (index !== -1) {
+      data.history[index] = {
+        ...data.history[index],
+        ...update,
+      };
+    } else {
+      const newEntry = {
+        ...createEmptyLearnData(currentDate),
+        ...update,
+      };
+      data.history.push(newEntry);
+    }
+    
+    writeStorage(data);
+  }
+  
+  
   static generateQuestions(): Question[] {
-    let data = readStorage()
-    let ques = generateQuestions(data.vocabularies);
-    this.addAchievements(
-      1,
-      ques.length
-    );
+    const data = readStorage();
+    const ques = generateQuestions(data.vocabularies);
+    this.incrementCurrentLearnDataBatch({
+      totalWordAttempts: ques.length,
+      totalPractice: 1,
+    });
+    this.recalculateMetrics();
     return ques;
   }
   
+  static recalculateMetrics(): void {
+    const data = readStorage();
+    const currentDate = getCurrentDateFormatted();
+    const index = data.history.findIndex(h => h.date === currentDate);
+    if (index === -1) return;
+    
+    const entry = data.history[index];
+    
+    entry.avgAttemptsPerWord = entry.uniqueWords > 0 ?
+      parseFloat((entry.totalWordAttempts / entry.uniqueWords).toFixed(2)) :
+      0;
+    
+    entry.completionRate = entry.totalWordAttempts > 0 ?
+      parseFloat((entry.correctAnswers / entry.totalWordAttempts * 100).toFixed(2)) :
+      0;
+    
+    entry.masteryScore = Math.max(0, entry.correctAnswers - entry.incorrectAnswers);
+    
+    writeStorage(data);
+  }
 }
 
 

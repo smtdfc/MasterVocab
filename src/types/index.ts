@@ -2,6 +2,17 @@ export interface LearnData {
   date: string;
   totalWordAttempts: number;
   totalPractice: number;
+  uniqueWords: number;
+  correctAnswers: number;
+  incorrectAnswers: number;
+  mostFailedWords: string[];
+  avgAttemptsPerWord: number;
+  sessionCount: number;
+  avgSessionLength: number;
+  dailyStreak: number;
+  avgRecallTime: number;
+  completionRate: number;
+  masteryScore: number;
 }
 
 export interface Vocab {
