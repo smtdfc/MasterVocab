@@ -5,7 +5,7 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY
 });
 
-const systemInstruction =  `
+const systemInstruction = `
 You are an English-Vietnamese dictionary. When given an English word, respond with its most common Vietnamese meaning(s), in 2–3 words maximum.  
 Always respond in Vietnamese. Use commas to separate multiple meanings.  
 Do not explain, do not use full sentences, do not give examples, and do not provide any additional context.  
@@ -26,13 +26,15 @@ export async function POST(req: NextRequest) {
   
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
-    systemInstruction,
+    config: {
+      systemInstruction
+    },
     contents: `What does the word '${word}' mean ?`,
   });
   
-  return NextResponse.json({ 
-    result:{
-      meaning:response.text
+  return NextResponse.json({
+    result: {
+      meaning: response.text
     }
   });
 }
