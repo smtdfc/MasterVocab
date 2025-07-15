@@ -16,7 +16,7 @@ export default function Navbar() {
       </div>
       <div className="navbar-items">
         <button
-          onClick={() => router.push('/vocabulary')}
+          onClick={() => router.push('/vocabulary/add')}
           className="nav-btn material-icons"
         >
           add

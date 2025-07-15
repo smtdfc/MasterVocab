@@ -41,10 +41,26 @@ export function readStorage(): UserData {
   };
 }
 
+export function writeStorage(data: UserData) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem("MasterVocab_Data", JSON.stringify(data));
+  }
+}
+
+
 export class UserManage {
   static getRecentLearningData(): LearnData[] {
     const data = readStorage();
     return data.history.slice(-6);
+  }
+  
+  static addWord(word: string, meaning: string) {
+    const data = readStorage();
+    data.vocabularies.push({
+      word,
+      meaning
+    });
+    writeStorage(data);
   }
   
   static search(query: string, limit = 10, offset = 0): Vocab[] {
@@ -58,5 +74,23 @@ export class UserManage {
       allVocab;
     
     return matched.slice(offset, offset + limit);
+  }
+  
+  static async searchMean(word: string): Promise<string>{
+    
+    const res = await fetch('/api/word/search-mean', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ word }),
+    });
+    
+    if (!res.ok) {
+      throw 'Error when send request !';
+    }
+    
+    let data =  await res.json();
+    return data.result.meaning as string;
   }
 }

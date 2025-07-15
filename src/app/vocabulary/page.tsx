@@ -5,6 +5,8 @@ import VocabCard from '@/components/VocabCard';
 import { useState, useEffect } from 'react';
 import { UserManage } from '@/services/client/user';
 import { Vocab } from '@/types';
+import '@/styles/pages/vocabulary.css';
+
 
 export default function Page() {
   const [search, setSearch] = useState('');
@@ -44,11 +46,11 @@ export default function Page() {
       </div>
 
       <div style={{ marginTop: "1rem", display: "flex", gap: "1rem" }}>
-        <button onClick={handlePrevious} disabled={offset === 0}>
-          Previous
+        <button className="btn-icon material-icons"  onClick={handlePrevious} disabled={offset === 0}>
+          arrow_back
         </button>
-        <button onClick={handleNext} disabled={results.length < limit}>
-          Next
+        <button className="btn-icon material-icons" onClick={handleNext} disabled={results.length < limit}>
+          arrow_forward
         </button>
       </div>
     </main>
