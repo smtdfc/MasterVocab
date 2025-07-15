@@ -40,6 +40,9 @@ export default function Offcanvas() {
           <li onClick={() => router.push('/quiz')}>
             <a>Quiz Game</a>
           </li>
+          <li onClick={() => router.push('/dict/import')}>
+            <a>Import Dictionary</a>
+          </li>
         </ul>
       </div>
     </div>
