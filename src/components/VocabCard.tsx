@@ -7,9 +7,10 @@ interface VocabCardProps {
   word: string;
   meaning: string;
   onExplain ? : (word: string) => void; 
+  onRemove?:(word: string) => void;
 }
 
-export default function VocabCard({ word, meaning, onExplain }: VocabCardProps) {
+export default function VocabCard({ word, meaning, onExplain,onRemove }: VocabCardProps) {
   const speak = () => {
     const utterance = new SpeechSynthesisUtterance(word);
     utterance.lang = 'en-US';
@@ -22,6 +23,7 @@ export default function VocabCard({ word, meaning, onExplain }: VocabCardProps) 
         <h3 className="vocab-word">{word}</h3>
         <div className="vocab-actions">
           <button className="vocab-btn material-icons" onClick={speak}>volume_up</button>
+          <button className="vocab-btn material-icons" onClick={() => onRemove?.(word)}>delete</button>
           <button className="vocab-btn material-icons" onClick={() => onExplain?.(word)}>info</button>
         </div>
       </div>

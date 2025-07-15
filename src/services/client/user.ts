@@ -61,6 +61,12 @@ export class UserManage {
     return data.history.slice(-6);
   }
   
+  static removeWord(word:string){
+    const data = readStorage();
+    data.vocabularies = data.vocabularies.filter(v => v.word === word);
+    writeStorage(data);
+  }
+  
   static addWord(word: string, meaning: string) {
     const data = readStorage();
     data.vocabularies.push({

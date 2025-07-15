@@ -40,7 +40,16 @@ export default function Page() {
           <p>🕵️ No results found.</p>
         ) : (
           results.map((item, i) => (
-            <VocabCard key={i} word={item.word} meaning={item.meaning} />
+            <VocabCard 
+            key={i} 
+            word={item.word} 
+            meaning={item.meaning} 
+            onRemove={async (word:string) => {
+              await UserManage.removeWord(word);
+              const newResults = await UserManage.search(search, limit, offset);
+              setResults(newResults);
+            }}
+          />
           ))
         )}
       </div>
