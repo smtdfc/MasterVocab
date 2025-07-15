@@ -72,75 +72,83 @@ export default function Home() {
     <>
       <h3>Learning effectiveness</h3>
 
-      <div style={{ maxWidth: 800 }}>
-        <Line
-          data={{
-            labels: recentData.map(d => d.date),
-            datasets: [
-              {
-                label: 'Completion Rate (%)',
-                data: recentData.map(d => d.completionRate),
-                borderColor: '#4BC0C0',
-                fill: false,
-              },
-            ],
-          }}
-        />
-
-        <Bar
-          data={{
-            labels: recentData.map(d => d.date),
-            datasets: [
-              {
-                label: 'Correct',
-                data: recentData.map(d => d.correctAnswers),
-                backgroundColor: '#36A2EB',
-              },
-              {
-                label: 'Incorrect',
-                data: recentData.map(d => d.incorrectAnswers),
-                backgroundColor: '#FF6384',
-              },
-            ],
-          }}
-        />
-
-        {latestData && (
-          <Doughnut
+      <div className="chart-grid">
+        <div className="chart-item">
+          <Line
             data={{
-              labels: ['Correct', 'Incorrect'],
+              labels: recentData.map(d => d.date),
               datasets: [
                 {
-                  data: [latestData.correctAnswers, latestData.incorrectAnswers],
-                  backgroundColor: ['#36A2EB', '#FF6384'],
+                  label: 'Completion Rate (%)',
+                  data: recentData.map(d => d.completionRate),
+                  borderColor: '#4BC0C0',
+                  fill: false,
                 },
               ],
             }}
           />
+        </div>
+
+        <div className="chart-item">
+          <Bar
+            data={{
+              labels: recentData.map(d => d.date),
+              datasets: [
+                {
+                  label: 'Correct',
+                  data: recentData.map(d => d.correctAnswers),
+                  backgroundColor: '#36A2EB',
+                },
+                {
+                  label: 'Incorrect',
+                  data: recentData.map(d => d.incorrectAnswers),
+                  backgroundColor: '#FF6384',
+                },
+              ],
+            }}
+          />
+        </div>
+
+        {latestData && (
+          <div className="chart-item">
+            <Doughnut
+              data={{
+                labels: ['Correct', 'Incorrect'],
+                datasets: [
+                  {
+                    data: [latestData.correctAnswers, latestData.incorrectAnswers],
+                    backgroundColor: ['#36A2EB', '#FF6384'],
+                  },
+                ],
+              }}
+            />
+          </div>
         )}
 
         {latestData && (
-          <Bar
-            data={{
-              labels: ['Total Word Attempts', 'Total Practice'],
-              datasets: [
-                {
-                  label: 'Normalized Score',
-                  data: [
-                    clamp01(latestData.totalWordAttempts / MAX_VOCAB),
-                    clamp01(latestData.totalPractice / MAX_PRACTICE),
-                  ],
-                  backgroundColor: ['#42A5F5', '#66BB6A'],
+          <div className="chart-item">
+            <Bar
+              data={{
+                labels: ['Total Word Attempts', 'Total Practice'],
+                datasets: [
+                  {
+                    label: 'Normalized Score',
+                    data: [
+                      clamp01(latestData.totalWordAttempts / MAX_VOCAB),
+                      clamp01(latestData.totalPractice / MAX_PRACTICE),
+                    ],
+                    backgroundColor: ['#42A5F5', '#66BB6A'],
+                  },
+                ],
+              }}
+              options={{
+                indexAxis: 'y',
+                scales: {
+                  x: { min: 0, max: 1 },
                 },
-              ],
-            }}
-            options={{
-              indexAxis: 'y',
-              scales: {
-                x: { min: 0, max: 1 },
-              },
-            }}
-          />
+              }}
+            />
+          </div>
         )}
       </div>
 
