@@ -1,5 +1,12 @@
-import { UserData, LearnData, Vocab ,Question} from '@/types';
+import { UserData, LearnData, Vocab, Question } from '@/types';
 
+function getCurrentDateFormatted(): string {
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+  return `${day}/${month}/${year}`;
+}
 
 export function fakeData(): void {
   if (typeof window !== 'undefined') {
@@ -34,7 +41,7 @@ export function fakeData(): void {
 export function readStorage(): UserData {
   if (typeof window !== 'undefined') {
     
-    if(!localStorage.getItem("MasterVocab_Data")) writeStorage({
+    if (!localStorage.getItem("MasterVocab_Data")) writeStorage({
       history: [],
       vocabularies: [],
     });
@@ -56,12 +63,36 @@ export function writeStorage(data: UserData) {
 
 
 export class UserManage {
+  static addAchievements(
+    totalPractice: number = 0,
+    totalVocab: number = 0
+  ) {
+    let data = readStorage();
+    let isNewAche = false;
+    let currentDate = getCurrentDateFormatted();
+    if (data.history[data.history.length - 1] && data.history[data.history.length - 1].date === currentDate) {
+      let achievement = data.history[data.history.length - 1];
+      data.history[data.history.length - 1] = {
+        date: currentDate,
+        totalVocab: achievement.totalVocab + totalVocab,
+        totalPractice: achievement.totalPractice + totalPractice,
+      };
+    } else {
+      data.history.push({
+        date: currentDate,
+        totalVocab,
+        totalPractice
+      });
+    }
+    writeStorage(data);
+  }
+  
   static getRecentLearningData(): LearnData[] {
     const data = readStorage();
     return data.history.slice(-6);
   }
   
-  static removeWord(word:string){
+  static removeWord(word: string) {
     const data = readStorage();
     data.vocabularies = data.vocabularies.filter(v => v.word !== word);
     writeStorage(data);
@@ -89,7 +120,7 @@ export class UserManage {
     return matched.slice(offset, offset + limit);
   }
   
-  static async searchMean(word: string): Promise<string>{
+  static async searchMean(word: string): Promise < string > {
     
     const res = await fetch('/api/word/search-mean', {
       method: 'POST',
@@ -103,14 +134,19 @@ export class UserManage {
       throw 'Error when send request !';
     }
     
-    let data =  await res.json();
+    let data = await res.json();
     return data.result.meaning as string;
   }
   
-  static generateQuestions():Question[]{
-    return generateQuestions(readStorage().vocabularies);
+  static generateQuestions(): Question[] {
+    let data = readStorage()
+    let ques = generateQuestions(data.vocabularies);
+    this.addAchievements(
+      1,
+      ques.length
+    );
+    return ques;
   }
-  
   
 }
 
