@@ -24,8 +24,7 @@ export default function Home() {
       seriesBarDistance: 15,
       axisY: { onlyInteger: true, offset: 40 },
     });
-    
-    setLatestData(recentData.at(-1));
+    setLatestData(recentData.at(-1) ?? null);
   }, []);
   
   const MAX_VOCAB = 150;

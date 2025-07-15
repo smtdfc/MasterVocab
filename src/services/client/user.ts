@@ -35,7 +35,10 @@ export function readStorage(): UserData {
   if (typeof window !== 'undefined') {
     return JSON.parse(localStorage.getItem("MasterVocab_Data") || '{}') as UserData;
   }
-  return { history: [] };
+  return {
+    history: [],
+    vocabularies: [],
+  };
 }
 
 export class UserManage {
