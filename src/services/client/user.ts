@@ -63,7 +63,7 @@ export class UserManage {
   
   static removeWord(word:string){
     const data = readStorage();
-    data.vocabularies = data.vocabularies.filter(v => v.word === word);
+    data.vocabularies = data.vocabularies.filter(v => v.word !== word);
     writeStorage(data);
   }
   
